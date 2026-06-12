@@ -32,8 +32,11 @@
         </header>
 
         <!-- Welcome & CSV Upload (Landing View) -->
-        <div id="welcome-upload-container">
+        <div id="welcome-upload-container" class="hidden">
             <div class="glass-panel text-center">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: -15px;">
+                    <button class="close-drawer-btn" id="close-uploader-btn" style="width: 32px; height: 32px; font-size: 20px;">&times;</button>
+                </div>
                 <h2 style="font-size: 20px; margin-bottom: 8px;">Upload Portfolio Data</h2>
                 <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
                     Upload CSV reports from your MeroShare account to analyze profits, losses, and transaction returns.
@@ -75,8 +78,8 @@
             </div>
         </div>
 
-        <!-- Dashboard View (Hidden until files loaded) -->
-        <div id="dashboard-content" class="hidden">
+        <!-- Dashboard View -->
+        <div id="dashboard-content">
             
             <!-- Dashboard Tab (Overview stats and analytics) -->
             <div id="dashboard-view">
@@ -189,7 +192,7 @@
         </div>
 
         <!-- Sticky Bottom Mobile App Navigation Bar -->
-        <nav class="bottom-nav hidden" id="bottom-nav-bar">
+        <nav class="bottom-nav" id="bottom-nav-bar">
             <button class="nav-item active" data-tab="dashboard">
                 <span class="nav-icon">📊</span>
                 <span>Overview</span>

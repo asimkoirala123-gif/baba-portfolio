@@ -855,6 +855,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('bottom-nav-bar').classList.add('hidden');
     });
 
+    // Close Uploader trigger
+    document.getElementById('close-uploader-btn').addEventListener('click', () => {
+        if (state.mySharesRaw && state.waccRaw) {
+            document.getElementById('welcome-upload-container').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+            document.getElementById('bottom-nav-bar').classList.remove('hidden');
+        } else {
+            alert("Please upload your portfolio CSV files first.");
+        }
+    });
+
     // Toggle WACC Source trigger
     const toggleBtn = document.getElementById('toggle-wacc-btn');
     if (toggleBtn) {
