@@ -219,19 +219,21 @@ function processData() {
         const balance = cleanNum(row['Current Balance']);
         if (balance <= 0) return; // Skip if no shares balance
 
-        // Stick strictly to matching CSV rows. If WACC data is missing, we exclude it to prevent artificial cost figures.
-        if (!waccMap[scrip]) {
-            return;
-        }
-
         const ltp = cleanNum(row['Last Transaction Price (LTP)']) || cleanNum(row['Last Closing Price']);
         const currentValue = balance * ltp;
 
-        const waccRate = waccMap[scrip].rate;
-        const totalCost = balance * waccRate;
+        let waccRate = 0;
+        let totalCost = 0;
+        let profitLoss = 0;
+        let profitLossPct = 0;
+        const hasWacc = !!waccMap[scrip];
 
-        const profitLoss = currentValue - totalCost;
-        const profitLossPct = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0;
+        if (hasWacc) {
+            waccRate = waccMap[scrip].rate;
+            totalCost = balance * waccRate;
+            profitLoss = currentValue - totalCost;
+            profitLossPct = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0;
+        }
 
         holdings.push({
             scrip,
@@ -243,7 +245,8 @@ function processData() {
             totalCost: totalCost,
             currentValue: currentValue,
             profitLoss: profitLoss,
-            profitLossPct: profitLossPct
+            profitLossPct: profitLossPct,
+            hasWacc: hasWacc
         });
     });
 
@@ -285,24 +288,30 @@ function updateUploadStatusPills() {
 function updateDashboardUI() {
     let totalCost = 0;
     let totalValue = 0;
+    let totalValueForPL = 0;
     let profitMakersCount = 0;
     let lossMakersCount = 0;
     let neutralCount = 0;
 
     state.holdings.forEach(h => {
-        totalCost += h.totalCost;
         totalValue += h.currentValue;
         
-        if (h.profitLoss > 0.01) {
-            profitMakersCount++;
-        } else if (h.profitLoss < -0.01) {
-            lossMakersCount++;
+        if (h.hasWacc) {
+            totalCost += h.totalCost;
+            totalValueForPL += h.currentValue;
+            if (h.profitLoss > 0.01) {
+                profitMakersCount++;
+            } else if (h.profitLoss < -0.01) {
+                lossMakersCount++;
+            } else {
+                neutralCount++;
+            }
         } else {
             neutralCount++;
         }
     });
 
-    const netPL = totalValue - totalCost;
+    const netPL = totalValueForPL - totalCost;
     const netPLPct = totalCost > 0 ? (netPL / totalCost) * 100 : 0;
 
     // Set Dashboard stats
@@ -530,9 +539,9 @@ function renderHoldingsList() {
     }
 
     state.filteredHoldings.forEach(h => {
-        const plSign = h.profitLoss >= 0 ? '+' : '';
-        const plClass = h.profitLoss > 0.01 ? 'profit' : (h.profitLoss < -0.01 ? 'loss' : 'neutral');
-        const textClass = h.profitLoss > 0.01 ? 'text-profit' : (h.profitLoss < -0.01 ? 'text-loss' : 'text-neutral');
+        const plSign = h.hasWacc && h.profitLoss >= 0 ? '+' : '';
+        const plClass = h.hasWacc ? (h.profitLoss > 0.01 ? 'profit' : (h.profitLoss < -0.01 ? 'loss' : 'neutral')) : 'neutral';
+        const textClass = h.hasWacc ? (h.profitLoss > 0.01 ? 'text-profit' : (h.profitLoss < -0.01 ? 'text-loss' : 'text-neutral')) : 'text-neutral';
 
         const card = document.createElement('div');
         card.className = 'holding-card';
@@ -547,7 +556,7 @@ function renderHoldingsList() {
                     </div>
                 </div>
                 <div class="holding-pl-badge ${plClass}">
-                    <span>${plSign}${h.profitLossPct.toFixed(2)}%</span>
+                    <span>${h.hasWacc ? plSign + h.profitLossPct.toFixed(2) + '%' : 'N/A'}</span>
                 </div>
             </div>
             
@@ -558,7 +567,7 @@ function renderHoldingsList() {
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Avg Cost (WACC)</span>
-                    <span class="detail-value">Rs. ${h.wacc.toFixed(2)}</span>
+                    <span class="detail-value">${h.hasWacc ? 'Rs. ' + h.wacc.toFixed(2) : 'N/A'}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">LTP</span>
@@ -566,7 +575,7 @@ function renderHoldingsList() {
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Total Cost</span>
-                    <span class="detail-value">Rs. ${Math.round(h.totalCost).toLocaleString()}</span>
+                    <span class="detail-value">${h.hasWacc ? 'Rs. ' + Math.round(h.totalCost).toLocaleString() : 'N/A'}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Current Value</span>
@@ -574,7 +583,7 @@ function renderHoldingsList() {
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Net Gain/Loss</span>
-                    <span class="detail-value ${textClass}">${plSign}Rs. ${Math.round(h.profitLoss).toLocaleString()}</span>
+                    <span class="detail-value ${textClass}">${h.hasWacc ? plSign + 'Rs. ' + Math.round(h.profitLoss).toLocaleString() : 'N/A'}</span>
                 </div>
             </div>
         `;
@@ -594,15 +603,20 @@ function openScripDrawer(holding) {
 
     // Overview numbers in drawer
     document.getElementById('drawer-total-qty').innerText = holding.quantity;
-    document.getElementById('drawer-avg-cost').innerText = 'Rs. ' + holding.wacc.toFixed(2);
+    document.getElementById('drawer-avg-cost').innerText = holding.hasWacc ? 'Rs. ' + holding.wacc.toFixed(2) : 'N/A';
     document.getElementById('drawer-ltp').innerText = 'Rs. ' + holding.ltp.toFixed(2);
-    document.getElementById('drawer-cost').innerText = 'Rs. ' + Math.round(holding.totalCost).toLocaleString();
+    document.getElementById('drawer-cost').innerText = holding.hasWacc ? 'Rs. ' + Math.round(holding.totalCost).toLocaleString() : 'N/A';
     document.getElementById('drawer-value').innerText = 'Rs. ' + Math.round(holding.currentValue).toLocaleString();
     
-    const plSign = holding.profitLoss >= 0 ? '+' : '';
+    const plSign = holding.hasWacc && holding.profitLoss >= 0 ? '+' : '';
     const plText = document.getElementById('drawer-pl');
-    plText.innerText = `${plSign}Rs. ${Math.round(holding.profitLoss).toLocaleString()} (${plSign}${holding.profitLossPct.toFixed(2)}%)`;
-    plText.className = holding.profitLoss > 0.01 ? 'text-profit' : (holding.profitLoss < -0.01 ? 'text-loss' : 'text-neutral');
+    if (holding.hasWacc) {
+        plText.innerText = `${plSign}Rs. ${Math.round(holding.profitLoss).toLocaleString()} (${plSign}${holding.profitLossPct.toFixed(2)}%)`;
+        plText.className = holding.profitLoss > 0.01 ? 'text-profit' : (holding.profitLoss < -0.01 ? 'text-loss' : 'text-neutral');
+    } else {
+        plText.innerText = 'N/A';
+        plText.className = 'text-neutral';
+    }
 
     // Preset values for Sell Simulator
     document.getElementById('calc-input-qty').value = holding.quantity;
@@ -673,34 +687,31 @@ function runSellingCalculator() {
     const totalReceivableBeforeCGT = grossAmount - totalExpenses;
 
     // Cost calculation (WACC * quantity)
-    const costForSoldQty = holding.wacc * sellQty;
+    const costForSoldQty = holding.hasWacc ? holding.wacc * sellQty : 0;
 
     // Profit calculation for Capital Gains Tax (CGT)
     const profitForTax = totalReceivableBeforeCGT - costForSoldQty;
 
     // CGT applies only on profit (Net profit > 0)
-    const cgt = profitForTax > 0 ? profitForTax * cgtRate : 0;
+    const cgt = (holding.hasWacc && profitForTax > 0) ? profitForTax * cgtRate : 0;
 
     const netReceivable = totalReceivableBeforeCGT - cgt;
-    const netProfitLoss = netReceivable - costForSoldQty;
+    const netProfitLoss = holding.hasWacc ? (netReceivable - costForSoldQty) : 0;
 
     // Update UI numbers
     document.getElementById('calc-gross').innerText = 'Rs. ' + grossAmount.toLocaleString('en-US', { maximumFractionDigits: 2 });
     document.getElementById('calc-commission').innerText = 'Rs. ' + commission.toLocaleString('en-US', { maximumFractionDigits: 2 });
     document.getElementById('calc-sebon').innerText = 'Rs. ' + sebonFee.toLocaleString('en-US', { maximumFractionDigits: 2 });
     document.getElementById('calc-dp').innerText = 'Rs. ' + dpFee.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    document.getElementById('calc-cgt').innerText = 'Rs. ' + cgt.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    document.getElementById('calc-cgt').innerText = holding.hasWacc ? 'Rs. ' + cgt.toLocaleString('en-US', { maximumFractionDigits: 2 }) : 'N/A';
     
     const netProfitElement = document.getElementById('calc-net-profit');
-    const plSign = netProfitLoss >= 0 ? '+' : '';
-    netProfitElement.innerText = `${plSign}Rs. ${netProfitLoss.toLocaleString('en-US', { maximumFractionDigits: 2 })} (${((netProfitLoss / (costForSoldQty || 1)) * 100).toFixed(2)}%)`;
-    
-    netProfitElement.className = '';
-    if (netProfitLoss > 0.01) {
-        netProfitElement.className = 'text-profit';
-    } else if (netProfitLoss < -0.01) {
-        netProfitElement.className = 'text-loss';
+    if (holding.hasWacc) {
+        const plSign = netProfitLoss >= 0 ? '+' : '';
+        netProfitElement.innerText = `${plSign}Rs. ${netProfitLoss.toLocaleString('en-US', { maximumFractionDigits: 2 })} (${((netProfitLoss / (costForSoldQty || 1)) * 100).toFixed(2)}%)`;
+        netProfitElement.className = netProfitLoss > 0.01 ? 'text-profit' : (netProfitLoss < -0.01 ? 'text-loss' : 'text-neutral');
     } else {
+        netProfitElement.innerText = 'N/A';
         netProfitElement.className = 'text-neutral';
     }
 }
