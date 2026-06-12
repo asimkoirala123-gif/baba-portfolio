@@ -752,7 +752,11 @@ function handleFileSelect(file, fileType) {
 async function loadDefaultFolderData() {
     try {
         const responseShares = await fetch('Share Data/My Shares Values.csv');
-        const responseWacc = await fetch('Share Data/WACC Report- Current Companies.csv');
+        let responseWacc = await fetch('Share Data/WACC Report - All time.csv');
+        
+        if (!responseWacc.ok) {
+            responseWacc = await fetch('Share Data/WACC Report- Current Companies.csv');
+        }
         
         if (responseShares.ok && responseWacc.ok) {
             state.mySharesRaw = await responseShares.text();
