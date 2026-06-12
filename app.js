@@ -780,6 +780,17 @@ async function loadDefaultFolderData() {
     return false;
 }
 
+async function prefetchFolderWaccs() {
+    try {
+        const responseAllTime = await fetch('Share Data/WACC Report - All time.csv');
+        const responseCurrent = await fetch('Share Data/WACC Report- Current Companies.csv');
+        if (responseAllTime.ok) state.waccAllTimeRaw = await responseAllTime.text();
+        if (responseCurrent.ok) state.waccCurrentRaw = await responseCurrent.text();
+    } catch (err) {
+        console.warn('Failed to pre-fetch WACC reports.', err);
+    }
+}
+
 function updateLandingStatus() {
     const sharesStatus = document.getElementById('status-shares');
     const waccStatus = document.getElementById('status-wacc');
@@ -803,9 +814,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedShares = localStorage.getItem('nepse_my_shares_raw');
     const savedWacc = localStorage.getItem('nepse_wacc_raw');
     
+    // Always prefetch both local reports so toggling works immediately
+    prefetchFolderWaccs();
+
     if (savedShares && savedWacc) {
         state.mySharesRaw = savedShares;
         state.waccRaw = savedWacc;
+        
+        // Also populate default raw values if the loaded wacc raw matches the folder WACCs
+        state.waccAllTimeRaw = savedWacc; // Use saved as current backup
+        state.waccCurrentRaw = savedWacc;
+        
         updateLandingStatus();
         processData();
     } else {
@@ -870,6 +889,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleBtn = document.getElementById('toggle-wacc-btn');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
+            if (!state.waccAllTimeRaw || !state.waccCurrentRaw) {
+                alert("WACC reports are still loading from the server. Please try again in a moment.");
+                return;
+            }
             if (state.activeWaccType === 'all-time') {
                 state.activeWaccType = 'current';
                 state.waccRaw = state.waccCurrentRaw;
