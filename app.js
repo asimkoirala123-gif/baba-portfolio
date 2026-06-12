@@ -187,38 +187,6 @@ function cleanNum(val) {
     return isNaN(num) ? 0 : num;
 }
 
-// Map Sector by Scrip Symbol prefix or common list
-function getSectorAndName(scrip) {
-    const sc = scrip.toUpperCase();
-    
-    // Commercial Banks
-    const commercialBanks = ['ADBL', 'EBL', 'GBIME', 'MBL', 'NABIL', 'NBL', 'NICA', 'NIMB', 'NMB', 'PCBL', 'SBI', 'SBL', 'SCB'];
-    if (commercialBanks.includes(sc)) return { sector: 'Commercial Bank', name: scrip + ' Bank' };
-    
-    // Microfinance
-    const micro = ['ACLBSL', 'AKBSL', 'ALBSL', 'CBBL', 'FMDBL', 'FOWAD', 'HLBSL', 'JBLB', 'KMCDB', 'MLBSL', 'MSLB', 'NADEP', 'NICLBSL', 'NMFBS', 'NUBL', 'RSDC', 'SMATA', 'VLBS', 'WNLB'];
-    if (micro.includes(sc) || sc.endsWith('LBSL') || sc.endsWith('LBS')) return { sector: 'Microfinance', name: scrip + ' Microfinance' };
-    
-    // Mutual Funds
-    const mf = ['MMF1', 'NBF2', 'NBF3', 'NICSF', 'RMF1', 'SSIS'];
-    if (mf.includes(sc) || sc.endsWith('F1') || sc.endsWith('F2') || sc.endsWith('F3') || sc.includes('SF')) return { sector: 'Mutual Fund', name: scrip + ' Mutual Fund' };
-
-    // Hydro
-    const hydro = ['BJHL', 'CHCL', 'HIDCL', 'RHPL', 'RIDI', 'SJCL', 'SKHL', 'UPPER', 'AKJCL', 'API', 'BHCL', 'CHL', 'DHPL', 'KKHC', 'KPCL', 'ULHC', 'USHEC'];
-    if (hydro.includes(sc) || sc.endsWith('HP') || sc.endsWith('HC') || sc.endsWith('CL') || sc.endsWith('JCL')) return { sector: 'Hydro Power', name: scrip + ' Hydro' };
-
-    // Life & Non Life Insurance
-    const insurance = ['HLI', 'NLICL', 'PLI', 'SJLIC', 'SRLI', 'GLICL', 'PMLI', 'HEI', 'ILI', 'JLI'];
-    if (insurance.includes(sc) || sc.endsWith('LICL') || sc.endsWith('LI') || sc.endsWith('ICL') || sc.endsWith('LIC')) return { sector: 'Insurance', name: scrip + ' Insurance' };
-
-    // Investment / Others
-    if (sc === 'CIT') return { sector: 'Investment', name: 'Citizen Investment Trust' };
-    if (sc === 'NIFRA') return { sector: 'Investment', name: 'Nepal Infrastructure Bank' };
-    if (sc === 'SHIVM') return { sector: 'Manufacturing', name: 'Shivam Cements' };
-
-    return { sector: 'Others', name: scrip };
-}
-
 // Processing & Merging Uploaded Data
 function processData() {
     if (!state.mySharesRaw || !state.waccRaw) {
@@ -250,35 +218,24 @@ function processData() {
         const balance = cleanNum(row['Current Balance']);
         if (balance <= 0) return; // Skip if no shares balance
 
+        // Stick strictly to matching CSV rows. If WACC data is missing, we exclude it to prevent artificial cost figures.
+        if (!waccMap[scrip]) {
+            return;
+        }
+
         const ltp = cleanNum(row['Last Transaction Price (LTP)']) || cleanNum(row['Last Closing Price']);
         const currentValue = balance * ltp;
 
-        // Retrieve WACC rate
-        let waccRate = 100; // default nominal value
-        let totalCost = balance * waccRate;
-
-        if (waccMap[scrip]) {
-            waccRate = waccMap[scrip].rate;
-            // WACC CSV total cost might refer to all shares ever bought. 
-            // We recalculate current cost based on active holdings and WACC rate.
-            totalCost = balance * waccRate;
-        } else {
-            // Check if there's any partial name match or try to guess if it's mutual fund (nominal = 10)
-            const details = getSectorAndName(scrip);
-            if (details.sector === 'Mutual Fund') {
-                waccRate = 10;
-                totalCost = balance * waccRate;
-            }
-        }
+        const waccRate = waccMap[scrip].rate;
+        const totalCost = balance * waccRate;
 
         const profitLoss = currentValue - totalCost;
         const profitLossPct = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0;
-        const sectorInfo = getSectorAndName(scrip);
 
         holdings.push({
             scrip,
-            companyName: sectorInfo.name,
-            sector: sectorInfo.sector,
+            companyName: scrip,
+            sector: 'Nepse Listed',
             quantity: balance,
             wacc: waccRate,
             ltp: ltp,
@@ -378,30 +335,44 @@ function updateDashboardUI() {
 
 // Custom Charts using SVGs
 function renderCharts() {
-    const pieSvg = document.getElementById('sector-allocation-pie');
+    const pieSvg = document.getElementById('portfolio-allocation-pie');
     const plBarsContainer = document.getElementById('pl-bars-container');
     
     if (!state.holdings.length) return;
 
-    // 1. Profit & Loss Sector Distribution
-    // Calculate sectors
-    const sectorsMap = {};
+    // 1. Portfolio Allocation by Scrip Value
     let totalPortfolioVal = 0;
     state.holdings.forEach(h => {
-        sectorsMap[h.sector] = (sectorsMap[h.sector] || 0) + h.currentValue;
         totalPortfolioVal += h.currentValue;
     });
 
-    const sectorColors = {
-        'Commercial Bank': '#6366f1', // Indigo
-        'Microfinance': '#10b981', // Emerald
-        'Hydro Power': '#06b6d4', // Cyan
-        'Insurance': '#ec4899', // Pink
-        'Mutual Fund': '#f59e0b', // Amber
-        'Investment': '#8b5cf6', // Purple
-        'Manufacturing': '#f97316', // Orange
-        'Others': '#64748b' // Slate
-    };
+    // Sort holdings by value descending
+    const sortedByVal = [...state.holdings].sort((a, b) => b.currentValue - a.currentValue);
+    
+    // Take top 5 and group the rest into 'Others'
+    const topHoldings = [];
+    let othersVal = 0;
+    
+    sortedByVal.forEach((h, index) => {
+        if (index < 5) {
+            topHoldings.push({ key: h.scrip, val: h.currentValue });
+        } else {
+            othersVal += h.currentValue;
+        }
+    });
+    
+    if (othersVal > 0) {
+        topHoldings.push({ key: 'Others', val: othersVal });
+    }
+
+    const allocationColors = [
+        '#6366f1', // Indigo
+        '#10b981', // Emerald
+        '#06b6d4', // Cyan
+        '#ec4899', // Pink
+        '#f59e0b', // Amber
+        '#64748b'  // Slate (Others)
+    ];
 
     // Draw SVG Donut Chart
     let cumulativePercent = 0;
@@ -412,11 +383,9 @@ function renderCharts() {
     const strokeWidth = 14;
     const circumference = 2 * Math.PI * radius;
 
-    const sectorsSorted = Object.entries(sectorsMap).sort((a, b) => b[1] - a[1]);
-
-    sectorsSorted.forEach(([sector, val]) => {
-        const percent = val / totalPortfolioVal;
-        const color = sectorColors[sector] || '#64748b';
+    topHoldings.forEach((item, index) => {
+        const percent = item.val / totalPortfolioVal;
+        const color = allocationColors[index] || '#64748b';
         const strokeDasharray = `${percent * circumference} ${circumference}`;
         const strokeDashoffset = -cumulativePercent * circumference;
 
@@ -443,15 +412,15 @@ function renderCharts() {
     
     pieSvg.innerHTML = svgContent;
 
-    // Render Pie Chart Legend
+    // Render Donut Chart Legend
     const legendDiv = document.getElementById('pie-legend');
-    legendDiv.innerHTML = sectorsSorted.map(([sector, val]) => {
-        const percent = (val / totalPortfolioVal * 100).toFixed(1);
-        const color = sectorColors[sector] || '#64748b';
+    legendDiv.innerHTML = topHoldings.map((item, index) => {
+        const percent = (item.val / totalPortfolioVal * 100).toFixed(1);
+        const color = allocationColors[index] || '#64748b';
         return `
             <div class="legend-item">
                 <span class="legend-dot" style="background-color: ${color}"></span>
-                <span>${sector}: <strong>${percent}%</strong></span>
+                <span>${item.key}: <strong>${percent}%</strong></span>
             </div>
         `;
     }).join('');
