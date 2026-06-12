@@ -23,7 +23,7 @@
             </div>
             <div class="header-actions">
                 <button class="icon-btn" id="clear-data-btn" title="Clear/Reset Saved Data" style="display: none;">
-                    <span>🗑️</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                 </button>
             </div>
         </header>
@@ -42,7 +42,9 @@
                 <!-- My Shares Values Upload Zone -->
                 <div class="upload-zone" id="shares-dropzone">
                     <input type="file" id="file-shares" accept=".csv" style="display:none">
-                    <div class="upload-icon">📊</div>
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload-cloud"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m15 15-3-3-3 3"/></svg>
+                    </div>
                     <div class="upload-title">My Shares Values.csv</div>
                     <div class="upload-subtitle">Drag & Drop or click to upload My Shares Values CSV</div>
                     <button class="demo-data-btn" onclick="document.getElementById('file-shares').click()">Choose File</button>
@@ -51,7 +53,9 @@
                 <!-- WACC Purchase Report Upload Zone -->
                 <div class="upload-zone" id="wacc-dropzone">
                     <input type="file" id="file-wacc" accept=".csv" style="display:none">
-                    <div class="upload-icon">💰</div>
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins"><circle cx="8" cy="8" r="6"/><circle cx="18" cy="18" r="6"/><path d="M12 18a6 6 0 0 0-6-6"/></svg>
+                    </div>
                     <div class="upload-title">WACC Report.csv</div>
                     <div class="upload-subtitle">Drag & Drop or click to upload WACC Purchase Report CSV</div>
                     <button class="demo-data-btn" onclick="document.getElementById('file-wacc').click()">Choose File</button>
@@ -78,13 +82,17 @@
             <div id="dashboard-view">
                 
                 <div class="tip-container" style="background: rgba(16, 185, 129, 0.05); border-left-color: var(--success); display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <span>💾 Data saved locally on browser</span>
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                        Data saved locally on browser
+                    </span>
                     <button class="demo-data-btn" id="update-files-btn" style="margin-top: 0; padding: 4px 10px; font-size: 11px;">Update Reports</button>
                 </div>
                 <!-- Main Portfolio summary card -->
                 <div class="summary-card total-value" id="portfolio-summary-card">
-                    <div class="summary-label">
-                        <span>💼</span> Portfolio Current Value
+                    <div class="summary-label" style="display: flex; align-items: center; gap: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        Portfolio Current Value
                     </div>
                     <div class="summary-value" id="stat-total-value">Rs. 0.00</div>
                     <div class="summary-subtext text-neutral" id="stat-total-pl">Rs. 0.00 (0.00%)</div>
@@ -93,14 +101,16 @@
                 <!-- Stats summary columns -->
                 <div class="summary-grid">
                     <div class="summary-card cost">
-                        <div class="summary-label">
-                            <span>💸</span> Total Cost basis
+                        <div class="summary-label" style="display: flex; align-items: center; gap: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins"><circle cx="8" cy="8" r="6"/><circle cx="18" cy="18" r="6"/><path d="M12 18a6 6 0 0 0-6-6"/></svg>
+                            Total Cost basis
                         </div>
                         <div class="summary-value" id="stat-total-cost" style="font-size: 18px;">Rs. 0.00</div>
                     </div>
                     <div class="summary-card distribution">
-                        <div class="summary-label">
-                            <span>📈</span> Scrips count
+                        <div class="summary-label" style="display: flex; align-items: center; gap: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                            Scrips count
                         </div>
                         <div class="summary-value" id="counter-total-scrips" style="font-size: 18px; display: flex; align-items: center; justify-content: space-between;">
                             <span>Active holdings</span>
@@ -127,7 +137,8 @@
                 <!-- Portfolio Allocation Chart Panel -->
                 <div class="glass-panel">
                     <h3 style="font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span>📊</span> Portfolio Allocation (By Value)
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart-2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                        Portfolio Allocation (By Value)
                     </h3>
                     <div class="chart-container">
                         <svg id="portfolio-allocation-pie" width="160" height="160" viewBox="0 0 160 160"></svg>
@@ -138,7 +149,8 @@
                 <!-- Profit & Loss Leaders Panel -->
                 <div class="glass-panel">
                     <h3 style="font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                        <span>🏆</span> Top Leaders & Laggards
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                        Top Leaders & Laggards
                     </h3>
                     <div id="pl-bars-container"></div>
                 </div>
@@ -147,14 +159,17 @@
             <!-- Holdings View (Searchable Scrips list) -->
             <div id="holdings-view" class="hidden">
                 
-                <div class="tip-container">
-                    💡 Tap on any scrip card to open the <strong>NEPSE Sales Commission & CGT Calculator</strong>.
+                <div class="tip-container" style="display: flex; align-items: center; gap: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    <span>Tap on any scrip card to open the <strong>NEPSE Sales Commission & CGT Calculator</strong>.</span>
                 </div>
 
                 <!-- Filters & Search Wrapper -->
                 <div class="search-filter-section">
                     <div class="search-wrapper">
-                        <span class="search-icon-inside">🔍</span>
+                        <span class="search-icon-inside" style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </span>
                         <input type="text" id="holdings-search" class="search-input" placeholder="Search scrip symbol...">
                     </div>
                     <select id="sort-filter" class="select-filter">
@@ -167,9 +182,9 @@
 
                 <!-- Filter Sub-Tabs -->
                 <div class="tabs-navigation" style="margin-bottom: 16px;">
-                    <button class="tab-btn active" data-filter="all">All</button>
-                    <button class="tab-btn" data-filter="profit">Gainers</button>
-                    <button class="tab-btn" data-filter="loss">Losers</button>
+                    <button class="tab-btn active" data-filter="all" onclick="switchFilterTab(this, 'all')">All</button>
+                    <button class="tab-btn" data-filter="profit" onclick="switchFilterTab(this, 'profit')">Gainers</button>
+                    <button class="tab-btn" data-filter="loss" onclick="switchFilterTab(this, 'loss')">Losers</button>
                 </div>
 
                 <!-- Cards holdings container -->
@@ -180,12 +195,16 @@
 
         <!-- Sticky Bottom Mobile App Navigation Bar -->
         <nav class="bottom-nav" id="bottom-nav-bar">
-            <button class="nav-item active" data-tab="dashboard">
-                <span class="nav-icon">📊</span>
+            <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <span class="nav-icon" style="display: flex; align-items: center; justify-content: center; height: 20px; margin-bottom: 2px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart-2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                </span>
                 <span>Overview</span>
             </button>
-            <button class="nav-item" data-tab="holdings">
-                <span class="nav-icon">📈</span>
+            <button class="nav-item" data-tab="holdings" onclick="switchTab('holdings')">
+                <span class="nav-icon" style="display: flex; align-items: center; justify-content: center; height: 20px; margin-bottom: 2px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                </span>
                 <span>My Holdings</span>
             </button>
         </nav>

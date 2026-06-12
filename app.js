@@ -188,6 +188,16 @@ function cleanNum(val) {
     return isNaN(num) ? 0 : num;
 }
 
+// Format numbers as per South Asian/Nepalese numbering format (Crore, Lakhs, etc.)
+function formatNepali(num, decimals = 2) {
+    if (num === null || num === undefined || isNaN(num)) return 'N/A';
+    return Number(num).toLocaleString('en-IN', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    });
+}
+
+
 // Processing & Merging Uploaded Data
 function processData() {
     if (!state.mySharesRaw || !state.waccRaw) {
@@ -315,12 +325,12 @@ function updateDashboardUI() {
     const netPLPct = totalCost > 0 ? (netPL / totalCost) * 100 : 0;
 
     // Set Dashboard stats
-    document.getElementById('stat-total-value').innerText = 'Rs. ' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('stat-total-cost').innerText = 'Rs. ' + totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('stat-total-value').innerText = 'Rs. ' + formatNepali(totalValue, 2);
+    document.getElementById('stat-total-cost').innerText = 'Rs. ' + formatNepali(totalCost, 2);
     
     const plElement = document.getElementById('stat-total-pl');
     const sign = netPL >= 0 ? '+' : '';
-    plElement.innerText = `${sign}Rs. ${netPL.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${netPLPct.toFixed(2)}%)`;
+    plElement.innerText = `${sign}Rs. ${formatNepali(netPL, 2)} (${sign}${netPLPct.toFixed(2)}%)`;
     
     // Apply styling based on P&L
     const cardElement = document.getElementById('portfolio-summary-card');
@@ -452,7 +462,7 @@ function renderCharts() {
                 <div class="bar-chart-row">
                     <div class="bar-chart-label">
                         <span>${h.scrip}</span>
-                        <span class="text-profit">+Rs. ${Math.round(h.profitLoss).toLocaleString()}</span>
+                        <span class="text-profit">+Rs. ${formatNepali(Math.round(h.profitLoss), 0)}</span>
                     </div>
                     <div class="bar-chart-track">
                         <div class="bar-chart-fill" style="width: ${pct}%; background-color: var(--success);"></div>
@@ -471,7 +481,7 @@ function renderCharts() {
                 <div class="bar-chart-row">
                     <div class="bar-chart-label">
                         <span>${h.scrip}</span>
-                        <span class="text-loss">-Rs. ${Math.abs(Math.round(h.profitLoss)).toLocaleString()}</span>
+                        <span class="text-loss">-Rs. ${formatNepali(Math.abs(Math.round(h.profitLoss)), 0)}</span>
                     </div>
                     <div class="bar-chart-track">
                         <div class="bar-chart-fill" style="width: ${pct}%; background-color: var(--danger);"></div>
@@ -563,27 +573,27 @@ function renderHoldingsList() {
             <div class="holding-details-grid">
                 <div class="detail-item">
                     <span class="detail-label">Qty</span>
-                    <span class="detail-value">${h.quantity}</span>
+                    <span class="detail-value">${formatNepali(h.quantity, 0)}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Avg Cost (WACC)</span>
-                    <span class="detail-value">${h.hasWacc ? 'Rs. ' + h.wacc.toFixed(2) : 'N/A'}</span>
+                    <span class="detail-value">${h.hasWacc ? 'Rs. ' + formatNepali(h.wacc, 2) : 'N/A'}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">LTP</span>
-                    <span class="detail-value">Rs. ${h.ltp.toFixed(2)}</span>
+                    <span class="detail-value">Rs. ${formatNepali(h.ltp, 2)}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Total Cost</span>
-                    <span class="detail-value">${h.hasWacc ? 'Rs. ' + Math.round(h.totalCost).toLocaleString() : 'N/A'}</span>
+                    <span class="detail-value">${h.hasWacc ? 'Rs. ' + formatNepali(Math.round(h.totalCost), 0) : 'N/A'}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Current Value</span>
-                    <span class="detail-value">Rs. ${Math.round(h.currentValue).toLocaleString()}</span>
+                    <span class="detail-value">Rs. ${formatNepali(Math.round(h.currentValue), 0)}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Net Gain/Loss</span>
-                    <span class="detail-value ${textClass}">${h.hasWacc ? plSign + 'Rs. ' + Math.round(h.profitLoss).toLocaleString() : 'N/A'}</span>
+                    <span class="detail-value ${textClass}">${h.hasWacc ? plSign + 'Rs. ' + formatNepali(Math.round(h.profitLoss), 0) : 'N/A'}</span>
                 </div>
             </div>
         `;
@@ -602,16 +612,16 @@ function openScripDrawer(holding) {
     document.getElementById('drawer-scrip-company').innerText = holding.companyName;
 
     // Overview numbers in drawer
-    document.getElementById('drawer-total-qty').innerText = holding.quantity;
-    document.getElementById('drawer-avg-cost').innerText = holding.hasWacc ? 'Rs. ' + holding.wacc.toFixed(2) : 'N/A';
-    document.getElementById('drawer-ltp').innerText = 'Rs. ' + holding.ltp.toFixed(2);
-    document.getElementById('drawer-cost').innerText = holding.hasWacc ? 'Rs. ' + Math.round(holding.totalCost).toLocaleString() : 'N/A';
-    document.getElementById('drawer-value').innerText = 'Rs. ' + Math.round(holding.currentValue).toLocaleString();
+    document.getElementById('drawer-total-qty').innerText = formatNepali(holding.quantity, 0);
+    document.getElementById('drawer-avg-cost').innerText = holding.hasWacc ? 'Rs. ' + formatNepali(holding.wacc, 2) : 'N/A';
+    document.getElementById('drawer-ltp').innerText = 'Rs. ' + formatNepali(holding.ltp, 2);
+    document.getElementById('drawer-cost').innerText = holding.hasWacc ? 'Rs. ' + formatNepali(Math.round(holding.totalCost), 0) : 'N/A';
+    document.getElementById('drawer-value').innerText = 'Rs. ' + formatNepali(Math.round(holding.currentValue), 0);
     
     const plSign = holding.hasWacc && holding.profitLoss >= 0 ? '+' : '';
     const plText = document.getElementById('drawer-pl');
     if (holding.hasWacc) {
-        plText.innerText = `${plSign}Rs. ${Math.round(holding.profitLoss).toLocaleString()} (${plSign}${holding.profitLossPct.toFixed(2)}%)`;
+        plText.innerText = `${plSign}Rs. ${formatNepali(Math.round(holding.profitLoss), 0)} (${plSign}${holding.profitLossPct.toFixed(2)}%)`;
         plText.className = holding.profitLoss > 0.01 ? 'text-profit' : (holding.profitLoss < -0.01 ? 'text-loss' : 'text-neutral');
     } else {
         plText.innerText = 'N/A';
@@ -699,16 +709,16 @@ function runSellingCalculator() {
     const netProfitLoss = holding.hasWacc ? (netReceivable - costForSoldQty) : 0;
 
     // Update UI numbers
-    document.getElementById('calc-gross').innerText = 'Rs. ' + grossAmount.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    document.getElementById('calc-commission').innerText = 'Rs. ' + commission.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    document.getElementById('calc-sebon').innerText = 'Rs. ' + sebonFee.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    document.getElementById('calc-dp').innerText = 'Rs. ' + dpFee.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    document.getElementById('calc-cgt').innerText = holding.hasWacc ? 'Rs. ' + cgt.toLocaleString('en-US', { maximumFractionDigits: 2 }) : 'N/A';
+    document.getElementById('calc-gross').innerText = 'Rs. ' + formatNepali(grossAmount, 2);
+    document.getElementById('calc-commission').innerText = 'Rs. ' + formatNepali(commission, 2);
+    document.getElementById('calc-sebon').innerText = 'Rs. ' + formatNepali(sebonFee, 2);
+    document.getElementById('calc-dp').innerText = 'Rs. ' + formatNepali(dpFee, 2);
+    document.getElementById('calc-cgt').innerText = holding.hasWacc ? 'Rs. ' + formatNepali(cgt, 2) : 'N/A';
     
     const netProfitElement = document.getElementById('calc-net-profit');
     if (holding.hasWacc) {
         const plSign = netProfitLoss >= 0 ? '+' : '';
-        netProfitElement.innerText = `${plSign}Rs. ${netProfitLoss.toLocaleString('en-US', { maximumFractionDigits: 2 })} (${((netProfitLoss / (costForSoldQty || 1)) * 100).toFixed(2)}%)`;
+        netProfitElement.innerText = `${plSign}Rs. ${formatNepali(netProfitLoss, 2)} (${((netProfitLoss / (costForSoldQty || 1)) * 100).toFixed(2)}%)`;
         netProfitElement.className = netProfitLoss > 0.01 ? 'text-profit' : (netProfitLoss < -0.01 ? 'text-loss' : 'text-neutral');
     } else {
         netProfitElement.innerText = 'N/A';
@@ -737,6 +747,15 @@ function switchTab(tabId) {
     }
 }
 
+// Filter tab switching
+function switchFilterTab(btn, filterValue) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.filterTab = filterValue;
+    filterAndSortHoldings();
+    renderHoldingsList();
+}
+
 // File reading handler
 function handleFileSelect(file, fileType) {
     const reader = new FileReader();
@@ -763,8 +782,8 @@ function handleFileSelect(file, fileType) {
 
 async function loadDefaultFolderData() {
     try {
-        const responseShares = await fetch('Share Data/My Shares Values.csv');
-        const responseWacc = await fetch('Share Data/WACC Report- Current Companies.csv');
+        const responseShares = await fetch('Share%20Data/My%20Shares%20Values.csv');
+        const responseWacc = await fetch('Share%20Data/WACC%20Report-%20Current%20Companies.csv');
         
         if (responseShares.ok && responseWacc.ok) {
             state.mySharesRaw = await responseShares.text();
@@ -795,8 +814,8 @@ function updateLandingStatus() {
     }
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
+// Initialization and Event Listeners setup
+function initApp() {
     // Check local storage for persistent data (custom user overrides)
     const savedShares = localStorage.getItem('nepse_my_shares_raw');
     const savedWacc = localStorage.getItem('nepse_wacc_raw');
@@ -811,6 +830,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDefaultFolderData().then(loaded => {
             if (!loaded) {
                 updateLandingStatus();
+                // If loading local files fails, display uploader so user is not stuck on an empty screen
+                document.getElementById('welcome-upload-container').classList.remove('hidden');
+                document.getElementById('dashboard-content').classList.add('hidden');
+                document.getElementById('bottom-nav-bar').classList.add('hidden');
             }
         });
     }
@@ -960,10 +983,18 @@ document.addEventListener('DOMContentLoaded', () => {
         runSellingCalculator();
     });
 
+    // CGT Toggle buttons
     document.getElementById('cgt-75').addEventListener('click', () => {
         document.getElementById('cgt-75').classList.add('active');
         document.getElementById('cgt-5').classList.remove('active');
         state.sellSim.cgtRate = 0.075;
         runSellingCalculator();
     });
-});
+}
+
+// Attach listeners safely
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}

@@ -8,25 +8,25 @@
 }
 
 :root {
-    --bg-primary: #0b0f19;
-    --bg-secondary: #131c2e;
-    --bg-tertiary: #1e293b;
-    --glass-bg: rgba(30, 41, 59, 0.45);
+    --bg-primary: #09090b; /* Zinc 950 */
+    --bg-secondary: #0f0f12; /* Dark secondary background */
+    --bg-tertiary: #18181b; /* Zinc 900 */
+    --glass-bg: rgba(24, 24, 27, 0.65); /* Translucent Zinc 900 */
     --glass-border: rgba(255, 255, 255, 0.08);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-tertiary: #64748b;
-    --primary: #6366f1; /* Indigo */
-    --primary-hover: #4f46e5;
-    --primary-glow: rgba(99, 102, 241, 0.35);
+    --text-primary: #f4f4f5; /* Zinc 100 */
+    --text-secondary: #a1a1aa; /* Zinc 400 */
+    --text-tertiary: #71717a; /* Zinc 500 */
+    --primary: #3b82f6; /* Premium Blue */
+    --primary-hover: #2563eb;
+    --primary-glow: rgba(59, 130, 246, 0.15);
     --success: #10b981; /* Emerald */
-    --success-glow: rgba(16, 185, 129, 0.25);
-    --danger: #f43f5e; /* Rose */
-    --danger-glow: rgba(244, 63, 94, 0.25);
+    --success-glow: rgba(16, 185, 129, 0.15);
+    --danger: #ef4444; /* Red */
+    --danger-glow: rgba(239, 68, 68, 0.15);
     --accent: #f59e0b; /* Amber */
-    --accent-glow: rgba(245, 158, 11, 0.25);
-    --card-radius: 20px;
-    --pill-radius: 30px;
+    --accent-glow: rgba(245, 158, 11, 0.15);
+    --card-radius: 16px;
+    --pill-radius: 24px;
     --font-header: 'Outfit', sans-serif;
 }
 
@@ -152,7 +152,7 @@ h1, h2, h3, h4 {
 
 .upload-zone:hover, .upload-zone.dragover {
     border-color: var(--primary);
-    background: rgba(99, 102, 241, 0.08);
+    background: var(--primary-glow);
 }
 
 .upload-icon {
@@ -212,9 +212,9 @@ h1, h2, h3, h4 {
 }
 
 .demo-data-btn {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    color: #a5b4fc;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
     padding: 8px 16px;
     border-radius: var(--pill-radius);
     font-size: 13px;
@@ -225,10 +225,10 @@ h1, h2, h3, h4 {
 }
 
 .demo-data-btn:hover {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 0 15px var(--primary-glow);
     border-color: var(--primary);
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--primary-glow);
 }
 
 /* Portfolio Summary Section */
@@ -268,8 +268,8 @@ h1, h2, h3, h4 {
 
 .summary-card.total-value {
     grid-column: 1 / -1;
-    background: linear-gradient(135deg, rgba(19, 28, 46, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: linear-gradient(135deg, rgba(24, 24, 27, 0.9) 0%, rgba(9, 9, 11, 0.95) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.5);
 }
 
@@ -462,7 +462,7 @@ h1, h2, h3, h4 {
 .search-input:focus {
     border-color: var(--primary);
     background: var(--bg-tertiary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .search-icon-inside {
@@ -549,13 +549,13 @@ h1, h2, h3, h4 {
 }
 
 .holding-pl-badge.profit {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
+    background: var(--success-glow);
+    color: var(--success);
 }
 
 .holding-pl-badge.loss {
-    background: rgba(244, 63, 94, 0.15);
-    color: #fb7185;
+    background: var(--danger-glow);
+    color: var(--danger);
 }
 
 .holding-pl-badge.neutral {
@@ -761,7 +761,7 @@ h1, h2, h3, h4 {
 }
 
 .cgt-btn.active {
-    background: rgba(99, 102, 241, 0.15);
+    background: var(--primary-glow);
     border-color: var(--primary);
     color: var(--primary);
 }
@@ -863,7 +863,7 @@ h1, h2, h3, h4 {
 
 /* Quick search tips */
 .tip-container {
-    background: rgba(99, 102, 241, 0.05);
+    background: var(--primary-glow);
     border-left: 3px solid var(--primary);
     padding: 10px 12px;
     border-radius: 0 8px 8px 0;
