@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MeroShare Portfolio & NEPSE Analyzer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-section">
+                <h1>MeroShare Analyzer</h1>
+                <p>NEPSE Portfolio & Sales Hub</p>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="clear-data-btn" title="Clear/Reset Saved Data" style="display: none;">
+                    <span>🗑️</span>
+                </button>
+                <button class="icon-btn" id="load-demo-btn" title="Load Demo Portfolio">
+                    <span>⚡</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Welcome & CSV Upload (Landing View) -->
+        <div id="welcome-upload-container">
+            <div class="glass-panel text-center">
+                <h2 style="font-size: 20px; margin-bottom: 8px;">Upload Portfolio Data</h2>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
+                    Upload CSV reports from your MeroShare account to analyze profits, losses, and transaction returns.
+                </p>
+
+                <!-- My Shares Values Upload Zone -->
+                <div class="upload-zone" id="shares-dropzone">
+                    <input type="file" id="file-shares" accept=".csv" style="display:none">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-title">My Shares Values.csv</div>
+                    <div class="upload-subtitle">Drag & Drop or click to upload My Shares Values CSV</div>
+                    <button class="demo-data-btn" onclick="document.getElementById('file-shares').click()">Choose File</button>
+                </div>
+
+                <!-- WACC Purchase Report Upload Zone -->
+                <div class="upload-zone" id="wacc-dropzone">
+                    <input type="file" id="file-wacc" accept=".csv" style="display:none">
+                    <div class="upload-icon">💰</div>
+                    <div class="upload-title">WACC Report.csv</div>
+                    <div class="upload-subtitle">Drag & Drop or click to upload WACC Purchase Report CSV</div>
+                    <button class="demo-data-btn" onclick="document.getElementById('file-wacc').click()">Choose File</button>
+                </div>
+
+                <div class="file-status-indicator" id="file-landing-status">
+                    <div class="file-status-pill">
+                        <span>My Shares Portfolio CSV</span>
+                        <span id="status-shares" class="status-missing">Pending</span>
+                    </div>
+                    <div class="file-status-pill">
+                        <span>WACC Purchase Report CSV</span>
+                        <span id="status-wacc" class="status-missing">Pending</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                    <p style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px;">Don't have files right now?</p>
+                    <button class="demo-data-btn" id="load-demo-btn-main" onclick="document.getElementById('load-demo-btn').click()">⚡ Load Demo Portfolio</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard View (Hidden until files loaded) -->
+        <div id="dashboard-content" class="hidden">
+            
+            <!-- Dashboard Tab (Overview stats and analytics) -->
+            <div id="dashboard-view">
+                
+                <div class="tip-container" style="background: rgba(16, 185, 129, 0.05); border-left-color: var(--success); display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <span>💾 Data saved locally on browser</span>
+                    <button class="demo-data-btn" id="update-files-btn" style="margin-top: 0; padding: 4px 10px; font-size: 11px;">Update Reports</button>
+                </div>
+                <!-- Main Portfolio summary card -->
+                <div class="summary-card total-value" id="portfolio-summary-card">
+                    <div class="summary-label">
+                        <span>💼</span> Portfolio Current Value
+                    </div>
+                    <div class="summary-value" id="stat-total-value">Rs. 0.00</div>
+                    <div class="summary-subtext text-neutral" id="stat-total-pl">Rs. 0.00 (0.00%)</div>
+                </div>
+
+                <!-- Stats summary columns -->
+                <div class="summary-grid">
+                    <div class="summary-card cost">
+                        <div class="summary-label">
+                            <span>💸</span> Total Cost basis
+                        </div>
+                        <div class="summary-value" id="stat-total-cost" style="font-size: 18px;">Rs. 0.00</div>
+                    </div>
+                    <div class="summary-card distribution">
+                        <div class="summary-label">
+                            <span>📈</span> Scrips count
+                        </div>
+                        <div class="summary-value" id="counter-total-scrips" style="font-size: 18px; display: flex; align-items: center; justify-content: space-between;">
+                            <span>Active holdings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Counters Row -->
+                <div class="counters-row">
+                    <div class="counter-pill">
+                        <div class="counter-num profit" id="counter-profit-qty">0</div>
+                        <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">In Profit</div>
+                    </div>
+                    <div class="counter-pill">
+                        <div class="counter-num loss" id="counter-loss-qty">0</div>
+                        <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">In Loss</div>
+                    </div>
+                    <div class="counter-pill">
+                        <div class="counter-num" id="counter-neutral-qty" style="color: var(--text-primary);">0</div>
+                        <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase;">Neutral</div>
+                    </div>
+                </div>
+
+                <!-- Sector Allocation Chart Panel -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>📊</span> Sector Distribution
+                    </h3>
+                    <div class="chart-container">
+                        <svg id="sector-allocation-pie" width="160" height="160" viewBox="0 0 160 160"></svg>
+                        <div class="chart-legend" id="pie-legend"></div>
+                    </div>
+                </div>
+
+                <!-- Profit & Loss Leaders Panel -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span>🏆</span> Top Leaders & Laggards
+                    </h3>
+                    <div id="pl-bars-container"></div>
+                </div>
+            </div>
+
+            <!-- Holdings View (Searchable Scrips list) -->
+            <div id="holdings-view" class="hidden">
+                
+                <div class="tip-container">
+                    💡 Tap on any scrip card to open the <strong>NEPSE Sales Commission & CGT Calculator</strong>.
+                </div>
+
+                <!-- Filters & Search Wrapper -->
+                <div class="search-filter-section">
+                    <div class="search-wrapper">
+                        <span class="search-icon-inside">🔍</span>
+                        <input type="text" id="holdings-search" class="search-input" placeholder="Search scrip symbol...">
+                    </div>
+                    <select id="sort-filter" class="select-filter">
+                        <option value="pl-desc">Gain (High-Low)</option>
+                        <option value="pl-asc">Loss (High-Low)</option>
+                        <option value="value-desc">Value (High-Low)</option>
+                        <option value="scrip-asc">Scrip (A-Z)</option>
+                    </select>
+                </div>
+
+                <!-- Filter Sub-Tabs -->
+                <div class="tabs-navigation" style="margin-bottom: 16px;">
+                    <button class="tab-btn active" data-filter="all">All</button>
+                    <button class="tab-btn" data-filter="profit">Gainers</button>
+                    <button class="tab-btn" data-filter="loss">Losers</button>
+                </div>
+
+                <!-- Cards holdings container -->
+                <div class="holdings-list" id="holdings-list-container"></div>
+            </div>
+
+        </div>
+
+        <!-- Sticky Bottom Mobile App Navigation Bar -->
+        <nav class="bottom-nav hidden" id="bottom-nav-bar">
+            <button class="nav-item active" data-tab="dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Overview</span>
+            </button>
+            <button class="nav-item" data-tab="holdings">
+                <span class="nav-icon">📈</span>
+                <span>My Holdings</span>
+            </button>
+        </nav>
+
+        <!-- Company details & Sell Simulator bottom drawer overlay -->
+        <div class="modal-overlay" id="drawer-modal">
+            <div class="bottom-drawer">
+                <div class="drawer-handle" style="width: 40px; height: 4px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; margin: -10px auto 16px auto;"></div>
+                <div class="drawer-header">
+                    <div>
+                        <h2 class="drawer-title" id="drawer-scrip-title">ADBL</h2>
+                        <span style="font-size: 11px; background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; color: var(--text-secondary);" id="drawer-scrip-sector">Commercial Bank</span>
+                    </div>
+                    <button class="close-drawer-btn" id="close-drawer">&times;</button>
+                </div>
+
+                <p style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px; font-weight: 500;" id="drawer-scrip-company">Agriculture Development Bank Ltd</p>
+
+                <!-- Value Stats Grid -->
+                <div class="holding-details-grid" style="border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; margin-bottom: 20px;">
+                    <div class="detail-item">
+                        <span class="detail-label">Quantity</span>
+                        <span class="detail-value" id="drawer-total-qty">0</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">WACC Cost</span>
+                        <span class="detail-value" id="drawer-avg-cost">Rs. 0.00</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">LTP (Market)</span>
+                        <span class="detail-value" id="drawer-ltp">Rs. 0.00</span>
+                    </div>
+                    <div class="detail-item" style="margin-top: 10px;">
+                        <span class="detail-label">Total Cost</span>
+                        <span class="detail-value" id="drawer-cost">Rs. 0.00</span>
+                    </div>
+                    <div class="detail-item" style="margin-top: 10px;">
+                        <span class="detail-label">Current Value</span>
+                        <span class="detail-value" id="drawer-value">Rs. 0.00</span>
+                    </div>
+                    <div class="detail-item" style="margin-top: 10px;">
+                        <span class="detail-label">Unrealized Gain</span>
+                        <span class="detail-value" id="drawer-pl">Rs. 0.00</span>
+                    </div>
+                </div>
+
+                <!-- Sell Simulator Calculator -->
+                <div class="sell-calc-section">
+                    <div class="sell-calc-title">
+                        <span>🧮</span> NEPSE Sales Calculator & Simulator
+                    </div>
+                    
+                    <div class="summary-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="input-group">
+                            <label class="input-label">Quantity to Sell</label>
+                            <div class="input-field-wrapper">
+                                <span class="input-prefix">Qty</span>
+                                <input type="number" id="calc-input-qty" class="input-field" value="0">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Selling Price</label>
+                            <div class="input-field-wrapper">
+                                <span class="input-prefix">Rs.</span>
+                                <input type="number" id="calc-input-price" class="input-field" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CGT Type selector -->
+                    <label class="input-label" style="margin-bottom: 6px;">Capital Gains Tax (CGT) Rate</label>
+                    <div class="cgt-toggle-row">
+                        <button class="cgt-btn active" id="cgt-5">5% (Long Term > 1 Year)</button>
+                        <button class="cgt-btn" id="cgt-75">7.5% (Short Term &lt; 1 Year)</button>
+                    </div>
+
+                    <!-- Detailed transaction breakdown -->
+                    <div class="calc-breakdown">
+                        <div class="calc-row">
+                            <span>Gross Sale Amount</span>
+                            <span id="calc-gross">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>NEPSE Broker Commission</span>
+                            <span id="calc-commission">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>SEBON regulation Fee (0.015%)</span>
+                            <span id="calc-sebon">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>DP Charge (CDSC Fee)</span>
+                            <span id="calc-dp">Rs. 25.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Capital Gain Tax (CGT)</span>
+                            <span id="calc-cgt">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row total">
+                            <span>Simulated NET Profit/Loss</span>
+                            <span id="calc-net-profit" class="text-neutral">Rs. 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Core App Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
