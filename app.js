@@ -394,15 +394,31 @@ function renderCharts() {
         '#64748b'  // Slate (Others)
     ];
 
-    // Draw SVG Donut Chart
+    // Draw SVG Donut Chart with Liquid Glass effects
     let cumulativePercent = 0;
-    let svgContent = '';
+    let svgContent = `
+        <defs>
+            <!-- Refractive soft glow filter -->
+            <filter id="glass-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <!-- 3D Cylindrical glass sheen gradient -->
+            <linearGradient id="glass-sheen" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45" />
+                <stop offset="30%" stop-color="#ffffff" stop-opacity="0.1" />
+                <stop offset="70%" stop-color="#000000" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#000000" stop-opacity="0.65" />
+            </linearGradient>
+        </defs>
+    `;
     const radius = 50;
     const cx = 80;
     const cy = 80;
     const strokeWidth = 14;
     const circumference = 2 * Math.PI * radius;
 
+    // Render base color segments with rounded caps and soft glass glow
     topHoldings.forEach((item, index) => {
         const percent = item.val / totalPortfolioVal;
         const color = allocationColors[index] || '#64748b';
@@ -417,17 +433,30 @@ function renderCharts() {
             stroke-dasharray="${strokeDasharray}" 
             stroke-dashoffset="${strokeDashoffset}"
             transform="rotate(-90 ${cx} ${cy})"
+            stroke-linecap="round"
+            filter="url(#glass-glow)"
             class="donut-segment"
         ></circle>`;
 
         cumulativePercent += percent;
     });
 
-    // Add center text
+    // Overlay the 3D glass sheen circle directly on top of the segments
+    svgContent += `<circle 
+        cx="${cx}" cy="${cy}" r="${radius}" 
+        fill="transparent" 
+        stroke="url(#glass-sheen)" 
+        stroke-width="${strokeWidth}" 
+        transform="rotate(-90 ${cx} ${cy})"
+        opacity="0.5"
+        pointer-events="none"
+    ></circle>`;
+
+    // Add center container and text
     svgContent += `
-        <circle cx="${cx}" cy="${cy}" r="${radius - strokeWidth/2 - 2}" fill="#131c2e" />
-        <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">PORTFOLIO</text>
-        <text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="#f8fafc" font-size="14" font-weight="800">Value</text>
+        <circle cx="${cx}" cy="${cy}" r="${radius - strokeWidth/2 - 2}" fill="#0f0f12" />
+        <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#a1a1aa" font-size="9" font-weight="700" letter-spacing="1px">PORTFOLIO</text>
+        <text x="${cx}" y="${cy + 11}" text-anchor="middle" fill="#f4f4f5" font-size="13" font-weight="800">Value</text>
     `;
     
     pieSvg.innerHTML = svgContent;
