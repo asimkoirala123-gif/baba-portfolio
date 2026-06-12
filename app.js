@@ -576,12 +576,15 @@ function renderHoldingsList() {
                     <span class="detail-value">${formatNepali(h.quantity, 0)}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="detail-label">Avg Cost (WACC)</span>
+                    <span class="detail-label">Avg Buy Price</span>
                     <span class="detail-value">${h.hasWacc ? 'Rs. ' + formatNepali(h.wacc, 2) : 'N/A'}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="detail-label">LTP</span>
-                    <span class="detail-value">Rs. ${formatNepali(h.ltp, 2)}</span>
+                    <span class="detail-label">Current Price</span>
+                    <span class="detail-value" style="display: flex; align-items: center; gap: 4px;">
+                        Rs. ${formatNepali(h.ltp, 2)}
+                        ${h.hasWacc ? (h.ltp > h.wacc ? '<span style="color:var(--success); font-size:10px;" title="Current price is above purchase cost">▲</span>' : (h.ltp < h.wacc ? '<span style="color:var(--danger); font-size:10px;" title="Current price is below purchase cost">▼</span>' : '')) : ''}
+                    </span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Total Cost</span>
@@ -949,11 +952,28 @@ function initApp() {
         });
     });
 
-    // Holdings search filter
-    document.getElementById('holdings-search').addEventListener('input', (e) => {
+    // Holdings search filter with Clear Button toggle QoL
+    const searchInput = document.getElementById('holdings-search');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+
+    searchInput.addEventListener('input', (e) => {
         state.searchQuery = e.target.value;
+        if (state.searchQuery.trim()) {
+            clearSearchBtn.classList.remove('hidden');
+        } else {
+            clearSearchBtn.classList.add('hidden');
+        }
         filterAndSortHoldings();
         renderHoldingsList();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        state.searchQuery = '';
+        clearSearchBtn.classList.add('hidden');
+        filterAndSortHoldings();
+        renderHoldingsList();
+        searchInput.focus();
     });
 
     // Holdings sorting drop down
@@ -961,6 +981,23 @@ function initApp() {
         state.sortBy = e.target.value;
         filterAndSortHoldings();
         renderHoldingsList();
+    });
+
+    // Scroll to Top FAB QoL
+    const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollToTopBtn.classList.add('visible');
+        } else {
+            scrollToTopBtn.classList.remove('visible');
+        }
+    });
+
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     });
 
     // Modal drawer close triggers

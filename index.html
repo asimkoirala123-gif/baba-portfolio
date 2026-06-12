@@ -170,6 +170,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                         </span>
                         <input type="text" id="holdings-search" class="search-input" placeholder="Search company symbol...">
+                        <button id="clear-search-btn" class="clear-search-btn hidden" title="Clear Search">&times;</button>
                     </div>
                     <select id="sort-filter" class="select-filter">
                         <option value="pl-desc">Gain (High-Low)</option>
@@ -229,11 +230,11 @@
                         <span class="detail-value" id="drawer-total-qty">0</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">WACC Cost</span>
+                        <span class="detail-label">Avg Buy Price</span>
                         <span class="detail-value" id="drawer-avg-cost">Rs. 0.00</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">LTP (Market)</span>
+                        <span class="detail-label">Current Price</span>
                         <span class="detail-value" id="drawer-ltp">Rs. 0.00</span>
                     </div>
                     <div class="detail-item" style="margin-top: 10px;">
@@ -313,6 +314,11 @@
         </div>
 
     </div>
+
+    <!-- Floating Scroll to Top button -->
+    <button id="scroll-to-top-btn" class="scroll-to-top-btn" title="Scroll to Top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up"><line x1="12" x2="12" y1="19" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </button>
 
     <!-- Core App Scripts -->
     <script src="app.js"></script>

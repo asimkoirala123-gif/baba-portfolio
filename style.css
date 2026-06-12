@@ -901,3 +901,66 @@ h1, h2, h3, h4 {
 .holding-card {
     animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+/* Quality of Life (QoL) Components */
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    z-index: 5;
+}
+
+.clear-search-btn:hover {
+    color: var(--text-primary);
+}
+
+.scroll-to-top-btn {
+    position: fixed;
+    bottom: 74px; /* Renders right above bottom nav */
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 850;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+}
+
+.scroll-to-top-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.scroll-to-top-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
