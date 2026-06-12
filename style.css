@@ -95,19 +95,13 @@ h1, h2, h3, h4 {
 }
 
 .logo-section h1 {
-    font-size: 24px;
-    background: linear-gradient(135deg, #a5b4fc 0%, var(--primary) 50%, #818cf8 100%);
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--text-primary) 10%, var(--primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: -0.5px;
-}
-
-.logo-section p {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-top: 2px;
+    letter-spacing: -1.0px;
+    margin: 0;
 }
 
 .header-actions {
@@ -435,6 +429,18 @@ h1, h2, h3, h4 {
     box-shadow: 0 4px 12px var(--primary-glow);
 }
 
+.tab-btn[data-filter="profit"].active {
+    background: var(--success);
+    color: white;
+    box-shadow: 0 4px 12px var(--success-glow);
+}
+
+.tab-btn[data-filter="loss"].active {
+    background: var(--danger);
+    color: white;
+    box-shadow: 0 4px 12px var(--danger-glow);
+}
+
 /* Search and Filter Inputs */
 .search-filter-section {
     display: flex;
@@ -510,9 +516,10 @@ h1, h2, h3, h4 {
 }
 
 .holding-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.15);
-    background: rgba(30, 41, 59, 0.6);
+    transform: translateY(-4px) scale(1.01);
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(24, 24, 27, 0.85);
+    box-shadow: 0 8px 20px -8px rgba(59, 130, 246, 0.2);
 }
 
 .holding-header {
@@ -874,4 +881,23 @@ h1, h2, h3, h4 {
 
 .hidden {
     display: none !important;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#dashboard-view:not(.hidden), #holdings-view:not(.hidden), #welcome-upload-container:not(.hidden) {
+    animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.holding-card {
+    animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
