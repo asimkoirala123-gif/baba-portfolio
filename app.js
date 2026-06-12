@@ -855,13 +855,23 @@ document.addEventListener('DOMContentLoaded', () => {
             state.holdings = [];
             state.filteredHoldings = [];
             
+            // Reset WACC source state to default all-time WACC
+            state.activeWaccType = 'all-time';
+            const sourceLabel = document.getElementById('wacc-source-label');
+            const toggleBtn = document.getElementById('toggle-wacc-btn');
+            if (sourceLabel) sourceLabel.innerText = 'All-Time';
+            if (toggleBtn) toggleBtn.innerText = 'Switch to Current Companies';
+            
             loadDefaultFolderData().then(loaded => {
-                if (!loaded) {
+                if (loaded) {
+                    alert("Reset successful: Custom uploads cleared and default folder CSV files reloaded.");
+                } else {
                     document.getElementById('welcome-upload-container').classList.remove('hidden');
                     document.getElementById('dashboard-content').classList.add('hidden');
                     document.getElementById('bottom-nav-bar').classList.add('hidden');
                     document.getElementById('clear-data-btn').style.display = 'none';
                     updateLandingStatus();
+                    alert("Custom uploads cleared. Default folder files could not be fetched. Please upload CSVs manually.");
                 }
             });
         }
