@@ -109,12 +109,10 @@ UPPER,1535,188.621,"289,533.20"
 VLBS,147,468.2922,"68,838.95"`;
 
 // App State
+// App State
 const state = {
     mySharesRaw: null,
     waccRaw: null,
-    waccAllTimeRaw: null,
-    waccCurrentRaw: null,
-    activeWaccType: 'all-time', // 'all-time' or 'current'
     holdings: [],
     filteredHoldings: [],
     searchQuery: '',
@@ -755,22 +753,11 @@ function handleFileSelect(file, fileType) {
 async function loadDefaultFolderData() {
     try {
         const responseShares = await fetch('Share Data/My Shares Values.csv');
-        const responseWaccAllTime = await fetch('Share Data/WACC Report - All time.csv');
-        const responseWaccCurrent = await fetch('Share Data/WACC Report- Current Companies.csv');
+        const responseWacc = await fetch('Share Data/WACC Report- Current Companies.csv');
         
-        if (responseShares.ok) {
+        if (responseShares.ok && responseWacc.ok) {
             state.mySharesRaw = await responseShares.text();
-            
-            if (responseWaccAllTime.ok) {
-                state.waccAllTimeRaw = await responseWaccAllTime.text();
-            }
-            if (responseWaccCurrent.ok) {
-                state.waccCurrentRaw = await responseWaccCurrent.text();
-            }
-            
-            // Set active wacc text
-            state.waccRaw = state.activeWaccType === 'all-time' ? state.waccAllTimeRaw : state.waccCurrentRaw;
-            
+            state.waccRaw = await responseWacc.text();
             processData();
             return true;
         }
@@ -778,17 +765,6 @@ async function loadDefaultFolderData() {
         console.warn('Failed to fetch local folder CSV files.', err);
     }
     return false;
-}
-
-async function prefetchFolderWaccs() {
-    try {
-        const responseAllTime = await fetch('Share Data/WACC Report - All time.csv');
-        const responseCurrent = await fetch('Share Data/WACC Report- Current Companies.csv');
-        if (responseAllTime.ok) state.waccAllTimeRaw = await responseAllTime.text();
-        if (responseCurrent.ok) state.waccCurrentRaw = await responseCurrent.text();
-    } catch (err) {
-        console.warn('Failed to pre-fetch WACC reports.', err);
-    }
 }
 
 function updateLandingStatus() {
@@ -814,17 +790,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedShares = localStorage.getItem('nepse_my_shares_raw');
     const savedWacc = localStorage.getItem('nepse_wacc_raw');
     
-    // Always prefetch both local reports so toggling works immediately
-    prefetchFolderWaccs();
-
     if (savedShares && savedWacc) {
         state.mySharesRaw = savedShares;
         state.waccRaw = savedWacc;
-        
-        // Also populate default raw values if the loaded wacc raw matches the folder WACCs
-        state.waccAllTimeRaw = savedWacc; // Use saved as current backup
-        state.waccCurrentRaw = savedWacc;
-        
         updateLandingStatus();
         processData();
     } else {
@@ -836,15 +804,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Demo Load trigger (loads the hardcoded sample values in case server fails)
-    document.getElementById('load-demo-btn').addEventListener('click', () => {
-        state.mySharesRaw = DEMO_SHARES_CSV;
-        state.waccRaw = DEMO_WACC_CSV;
-        localStorage.setItem('nepse_my_shares_raw', DEMO_SHARES_CSV);
-        localStorage.setItem('nepse_wacc_raw', DEMO_WACC_CSV);
-        processData();
-    });
-
     // Clear Data trigger - resets back to default folder CSVs
     document.getElementById('clear-data-btn').addEventListener('click', () => {
         if (confirm("Reset custom uploads and load default portfolio files from the local directory?")) {
@@ -854,13 +813,6 @@ document.addEventListener('DOMContentLoaded', () => {
             state.waccRaw = null;
             state.holdings = [];
             state.filteredHoldings = [];
-            
-            // Reset WACC source state to default all-time WACC
-            state.activeWaccType = 'all-time';
-            const sourceLabel = document.getElementById('wacc-source-label');
-            const toggleBtn = document.getElementById('toggle-wacc-btn');
-            if (sourceLabel) sourceLabel.innerText = 'All-Time';
-            if (toggleBtn) toggleBtn.innerText = 'Switch to Current Companies';
             
             loadDefaultFolderData().then(loaded => {
                 if (loaded) {
@@ -894,29 +846,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Please upload your portfolio CSV files first.");
         }
     });
-
-    // Toggle WACC Source trigger
-    const toggleBtn = document.getElementById('toggle-wacc-btn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            if (!state.waccAllTimeRaw || !state.waccCurrentRaw) {
-                alert("WACC reports are still loading from the server. Please try again in a moment.");
-                return;
-            }
-            if (state.activeWaccType === 'all-time') {
-                state.activeWaccType = 'current';
-                state.waccRaw = state.waccCurrentRaw;
-                document.getElementById('wacc-source-label').innerText = 'Current Companies';
-                toggleBtn.innerText = 'Switch to All-Time';
-            } else {
-                state.activeWaccType = 'all-time';
-                state.waccRaw = state.waccAllTimeRaw;
-                document.getElementById('wacc-source-label').innerText = 'All-Time';
-                toggleBtn.innerText = 'Switch to Current Companies';
-            }
-            processData();
-        });
-    }
 
     // File Drag & Drop + Input setup
     const fileSharesInput = document.getElementById('file-shares');

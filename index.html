@@ -25,9 +25,6 @@
                 <button class="icon-btn" id="clear-data-btn" title="Clear/Reset Saved Data" style="display: none;">
                     <span>🗑️</span>
                 </button>
-                <button class="icon-btn" id="load-demo-btn" title="Load Demo Portfolio">
-                    <span>⚡</span>
-                </button>
             </div>
         </header>
 
@@ -71,10 +68,6 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 24px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
-                    <p style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px;">Don't have files right now?</p>
-                    <button class="demo-data-btn" id="load-demo-btn-main" onclick="document.getElementById('load-demo-btn').click()">⚡ Load Demo Portfolio</button>
-                </div>
             </div>
         </div>
 
@@ -84,15 +77,9 @@
             <!-- Dashboard Tab (Overview stats and analytics) -->
             <div id="dashboard-view">
                 
-                <div class="tip-container" style="background: rgba(16, 185, 129, 0.05); border-left-color: var(--success); display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span>💾 Data saved locally on browser</span>
-                        <button class="demo-data-btn" id="update-files-btn" style="margin-top: 0; padding: 4px 10px; font-size: 11px;">Update Reports</button>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px; width: 100%;">
-                        <span style="font-size: 11px;">WACC Source: <strong id="wacc-source-label" style="color: var(--primary);">All-Time</strong></span>
-                        <button class="demo-data-btn" id="toggle-wacc-btn" style="margin-top: 0; padding: 4px 10px; font-size: 11px; background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc;">Switch to Current Companies</button>
-                    </div>
+                <div class="tip-container" style="background: rgba(16, 185, 129, 0.05); border-left-color: var(--success); display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <span>💾 Data saved locally on browser</span>
+                    <button class="demo-data-btn" id="update-files-btn" style="margin-top: 0; padding: 4px 10px; font-size: 11px;">Update Reports</button>
                 </div>
                 <!-- Main Portfolio summary card -->
                 <div class="summary-card total-value" id="portfolio-summary-card">
