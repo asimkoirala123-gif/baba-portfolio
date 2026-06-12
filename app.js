@@ -112,6 +112,9 @@ VLBS,147,468.2922,"68,838.95"`;
 const state = {
     mySharesRaw: null,
     waccRaw: null,
+    waccAllTimeRaw: null,
+    waccCurrentRaw: null,
+    activeWaccType: 'all-time', // 'all-time' or 'current'
     holdings: [],
     filteredHoldings: [],
     searchQuery: '',
@@ -752,15 +755,22 @@ function handleFileSelect(file, fileType) {
 async function loadDefaultFolderData() {
     try {
         const responseShares = await fetch('Share Data/My Shares Values.csv');
-        let responseWacc = await fetch('Share Data/WACC Report - All time.csv');
+        const responseWaccAllTime = await fetch('Share Data/WACC Report - All time.csv');
+        const responseWaccCurrent = await fetch('Share Data/WACC Report- Current Companies.csv');
         
-        if (!responseWacc.ok) {
-            responseWacc = await fetch('Share Data/WACC Report- Current Companies.csv');
-        }
-        
-        if (responseShares.ok && responseWacc.ok) {
+        if (responseShares.ok) {
             state.mySharesRaw = await responseShares.text();
-            state.waccRaw = await responseWacc.text();
+            
+            if (responseWaccAllTime.ok) {
+                state.waccAllTimeRaw = await responseWaccAllTime.text();
+            }
+            if (responseWaccCurrent.ok) {
+                state.waccCurrentRaw = await responseWaccCurrent.text();
+            }
+            
+            // Set active wacc text
+            state.waccRaw = state.activeWaccType === 'all-time' ? state.waccAllTimeRaw : state.waccCurrentRaw;
+            
             processData();
             return true;
         }
@@ -844,6 +854,25 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('dashboard-content').classList.add('hidden');
         document.getElementById('bottom-nav-bar').classList.add('hidden');
     });
+
+    // Toggle WACC Source trigger
+    const toggleBtn = document.getElementById('toggle-wacc-btn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            if (state.activeWaccType === 'all-time') {
+                state.activeWaccType = 'current';
+                state.waccRaw = state.waccCurrentRaw;
+                document.getElementById('wacc-source-label').innerText = 'Current Companies';
+                toggleBtn.innerText = 'Switch to All-Time';
+            } else {
+                state.activeWaccType = 'all-time';
+                state.waccRaw = state.waccAllTimeRaw;
+                document.getElementById('wacc-source-label').innerText = 'All-Time';
+                toggleBtn.innerText = 'Switch to Current Companies';
+            }
+            processData();
+        });
+    }
 
     // File Drag & Drop + Input setup
     const fileSharesInput = document.getElementById('file-shares');
