@@ -119,7 +119,12 @@ const state = {
     currentTab: 'dashboard', // 'dashboard', 'holdings'
     filterTab: 'all', // 'all', 'profit', 'loss'
     sortBy: 'pl-desc', // 'pl-desc', 'pl-asc', 'value-desc', 'scrip-asc'
-    selectedScrip: null
+    selectedScrip: null,
+    sellSim: {
+        price: 0,
+        qty: 0,
+        cgtRate: 0.05 // 5% CGT standard for long term, or 7.5% for short term
+    }
 };
 
 // CSV Parser Helper
@@ -626,6 +631,21 @@ function openScripDrawer(holding) {
         plText.className = 'text-neutral';
     }
 
+    // Preset values for Sell Simulator
+    document.getElementById('calc-input-qty').value = holding.quantity;
+    document.getElementById('calc-input-price').value = holding.ltp;
+    
+    state.sellSim.qty = holding.quantity;
+    state.sellSim.price = holding.ltp;
+    state.sellSim.cgtRate = 0.05; // Reset default to 5% (long-term)
+
+    // Set default active CGT button styling
+    document.getElementById('cgt-5').classList.add('active');
+    document.getElementById('cgt-75').classList.remove('active');
+
+    // Run selling calculations
+    runSellingCalculator();
+
     // Show Drawer Modal
     document.getElementById('drawer-modal').classList.add('active');
 }
@@ -633,6 +653,80 @@ function openScripDrawer(holding) {
 function closeScripDrawer() {
     document.getElementById('drawer-modal').classList.remove('active');
     state.selectedScrip = null;
+}
+
+// NEPSE Sell Commission & Capital Gains Tax calculator
+function runSellingCalculator() {
+    const holding = state.selectedScrip;
+    if (!holding) return;
+
+    const sellPrice = parseFloat(document.getElementById('calc-input-price').value) || 0;
+    const sellQty = parseFloat(document.getElementById('calc-input-qty').value) || 0;
+    const cgtRate = state.sellSim.cgtRate;
+
+    const grossAmount = sellPrice * sellQty;
+
+    // NEPSE Commission brackets (selling or buying)
+    // Up to 50k: 0.40%
+    // 50k to 500k: 0.37%
+    // 500k to 20L: 0.34%
+    // 20L to 1Cr: 0.30%
+    // Above 1Cr: 0.27%
+    // Min commission = Rs 10
+    let commissionRate = 0.004;
+    if (grossAmount > 10000000) {
+        commissionRate = 0.0027;
+    } else if (grossAmount > 2000000) {
+        commissionRate = 0.003;
+    } else if (grossAmount > 500000) {
+        commissionRate = 0.0034;
+    } else if (grossAmount > 50000) {
+        commissionRate = 0.0037;
+    }
+
+    let commission = grossAmount * commissionRate;
+    if (grossAmount > 0 && commission < 10) {
+        commission = 10;
+    }
+
+    // SEBON regulation fee: 0.015%
+    const sebonFee = grossAmount * 0.00015;
+
+    // DP fee (CDSC DP Charge): Rs. 25 flat per scrip transfer
+    const dpFee = grossAmount > 0 ? 25 : 0;
+
+    // Total expenses
+    const totalExpenses = commission + sebonFee + dpFee;
+    const totalReceivableBeforeCGT = grossAmount - totalExpenses;
+
+    // Cost calculation (WACC * quantity)
+    const costForSoldQty = holding.hasWacc ? holding.wacc * sellQty : 0;
+
+    // Profit calculation for Capital Gains Tax (CGT)
+    const profitForTax = totalReceivableBeforeCGT - costForSoldQty;
+
+    // CGT applies only on profit (Net profit > 0)
+    const cgt = (holding.hasWacc && profitForTax > 0) ? profitForTax * cgtRate : 0;
+
+    const netReceivable = totalReceivableBeforeCGT - cgt;
+    const netProfitLoss = holding.hasWacc ? (netReceivable - costForSoldQty) : 0;
+
+    // Update UI numbers
+    document.getElementById('calc-gross').innerText = 'Rs. ' + formatNepali(grossAmount, 2);
+    document.getElementById('calc-commission').innerText = 'Rs. ' + formatNepali(commission, 2);
+    document.getElementById('calc-sebon').innerText = 'Rs. ' + formatNepali(sebonFee, 2);
+    document.getElementById('calc-dp').innerText = 'Rs. ' + formatNepali(dpFee, 2);
+    document.getElementById('calc-cgt').innerText = holding.hasWacc ? 'Rs. ' + formatNepali(cgt, 2) : 'N/A';
+    
+    const netProfitElement = document.getElementById('calc-net-profit');
+    if (holding.hasWacc) {
+        const plSign = netProfitLoss >= 0 ? '+' : '';
+        netProfitElement.innerText = `${plSign}Rs. ${formatNepali(netProfitLoss, 2)} (${((netProfitLoss / (costForSoldQty || 1)) * 100).toFixed(2)}%)`;
+        netProfitElement.className = netProfitLoss > 0.01 ? 'text-profit' : (netProfitLoss < -0.01 ? 'text-loss' : 'text-neutral');
+    } else {
+        netProfitElement.innerText = 'N/A';
+        netProfitElement.className = 'text-neutral';
+    }
 }
 
 // Nav Page routing
@@ -912,6 +1006,26 @@ function initApp() {
         if (e.target === document.getElementById('drawer-modal')) {
             closeScripDrawer();
         }
+    });
+
+    // Sell Calculator fields change listeners
+    document.getElementById('calc-input-price').addEventListener('input', runSellingCalculator);
+    document.getElementById('calc-input-qty').addEventListener('input', runSellingCalculator);
+
+    // CGT Toggle buttons
+    document.getElementById('cgt-5').addEventListener('click', () => {
+        document.getElementById('cgt-5').classList.add('active');
+        document.getElementById('cgt-75').classList.remove('active');
+        state.sellSim.cgtRate = 0.05;
+        runSellingCalculator();
+    });
+
+    // CGT Toggle buttons
+    document.getElementById('cgt-75').addEventListener('click', () => {
+        document.getElementById('cgt-75').classList.add('active');
+        document.getElementById('cgt-5').classList.remove('active');
+        state.sellSim.cgtRate = 0.075;
+        runSellingCalculator();
     });
 }
 

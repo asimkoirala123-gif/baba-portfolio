@@ -247,6 +247,64 @@
                     </div>
                 </div>
 
+                <!-- Sell Simulator Calculator -->
+                <div class="sell-calc-section">
+                    <div class="sell-calc-title">
+                        <span>🧮</span> NEPSE Sales Calculator & Simulator
+                    </div>
+                    
+                    <div class="summary-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="input-group">
+                            <label class="input-label">Quantity to Sell</label>
+                            <div class="input-field-wrapper">
+                                <span class="input-prefix">Qty</span>
+                                <input type="number" id="calc-input-qty" class="input-field" value="0">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Selling Price</label>
+                            <div class="input-field-wrapper">
+                                <span class="input-prefix">Rs.</span>
+                                <input type="number" id="calc-input-price" class="input-field" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CGT Type selector -->
+                    <label class="input-label" style="margin-bottom: 6px;">Capital Gains Tax (CGT) Rate</label>
+                    <div class="cgt-toggle-row">
+                        <button class="cgt-btn active" id="cgt-5">5% (Long Term > 1 Year)</button>
+                        <button class="cgt-btn" id="cgt-75">7.5% (Short Term &lt; 1 Year)</button>
+                    </div>
+
+                    <!-- Detailed transaction breakdown -->
+                    <div class="calc-breakdown">
+                        <div class="calc-row">
+                            <span>Gross Sale Amount</span>
+                            <span id="calc-gross">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>NEPSE Broker Commission</span>
+                            <span id="calc-commission">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>SEBON regulation Fee (0.015%)</span>
+                            <span id="calc-sebon">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>DP Charge (CDSC Fee)</span>
+                            <span id="calc-dp">Rs. 25.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Capital Gain Tax (CGT)</span>
+                            <span id="calc-cgt">Rs. 0.00</span>
+                        </div>
+                        <div class="calc-row total">
+                            <span>Simulated NET Profit/Loss</span>
+                            <span id="calc-net-profit" class="text-neutral">Rs. 0.00</span>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
